@@ -28,11 +28,11 @@ namespace Stardust.KeenIo.Client
 
         //[HttpPost]
         //[Route("{projectId}/events/{collectionName}")]
-        //Task AddEvent([In(InclutionTypes.Path)]string projectId, [In(InclutionTypes.Path)]string collectionName, [In(InclutionTypes.Body)]dynamic entry);
+        //Task AddEvents([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Path)] string collectionName, [ExtensionLevel(1)][In(InclutionTypes.Body)] IEnumerable<object> eventEntries);
 
         [HttpPost]
         [Route("{projectId}/events")]
-        Task AddEvents([In(InclutionTypes.Path)]string projectId, [In(InclutionTypes.Body)]IDictionary<string, IEnumerable<object>> eventEntry);
+        Task AddEvents([In(InclutionTypes.Path)]string projectId, [ExtensionLevel(3)][In(InclutionTypes.Body)]IDictionary<string, IEnumerable<object>> eventEntry);
     }
 
     public class KeenObject
