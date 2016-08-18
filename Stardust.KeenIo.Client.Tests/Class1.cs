@@ -55,5 +55,18 @@ namespace Stardust.KeenIo.Client.Tests
             await client.AddEvents("560c2d6e672e6c1204fba8d5", envents);
 
         }
+
+        [Fact]
+        public void GetCollection()
+        {
+            var reader = ProxyFactory.CreateInstance<IEventCollections>("https://api.keen.io");
+            var all = reader.GetAllCollection("560c2d6e672e6c1204fba8d5");
+            Assert.NotEmpty(all);
+            foreach (var collection in all)
+            {
+                var c = reader.GetCollection("560c2d6e672e6c1204fba8d5", collection.Name);
+                Assert.NotNull(c);
+            }
+        }
     }
 }
