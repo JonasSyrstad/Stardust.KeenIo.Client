@@ -5,7 +5,7 @@ using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
 
-namespace Stardust.KeenIo.Client
+namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     [KeenWriteAuthorization]
     [FixedClientUserAgent("stardust/1.0")]

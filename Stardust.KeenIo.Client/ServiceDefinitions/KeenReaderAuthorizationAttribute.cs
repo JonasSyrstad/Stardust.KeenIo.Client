@@ -5,11 +5,11 @@ using System.Net;
 using System.Net.Http.Headers;
 using Stardust.Interstellar.Rest.Extensions;
 
-namespace Stardust.KeenIo.Client
+namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
-    public class KeenWriteAuthorizationAttribute : Attribute, IHeaderInspector, IHeaderHandler
+    public class KeenReaderAuthorizationAttribute : Attribute, IHeaderInspector, IHeaderHandler
     {
-        internal static string WriterKey;
+        internal static string ReaderKey;
 
         public IHeaderHandler[] GetHandlers()
         {
@@ -19,13 +19,13 @@ namespace Stardust.KeenIo.Client
         public void SetHeader(HttpWebRequest req)
         {
             if (req.Headers.AllKeys.Any(k => k == "Authorization")) return;
-            req.Headers.Add("Authorization", GetWriterKey());
+            req.Headers.Add("Authorization", GetReaderKey());
         }
 
-        private string GetWriterKey()
+        private string GetReaderKey()
         {
-            if (string.IsNullOrWhiteSpace(WriterKey)) WriterKey = ConfigurationManager.AppSettings["keen:writerKey"];
-            return WriterKey;
+            if (string.IsNullOrWhiteSpace(ReaderKey)) ReaderKey = ConfigurationManager.AppSettings["keen:readerKey"];
+            return ReaderKey;
         }
 
         public void GetHeader(HttpWebResponse response)

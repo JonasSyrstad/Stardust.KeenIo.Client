@@ -34,6 +34,9 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Stardust.Interstellar.Rest">
+      <HintPath>..\packages\Stardust.Interstellar.Rest.2.6.1.0\lib\net45\Stardust.Interstellar.Rest.dll</HintPath>
+    </Reference>
     <Reference Include="Stardust.Interstellar.Rest.Annotations, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Stardust.Interstellar.Rest.Annotations.1.3.1.0\lib\net45\Stardust.Interstellar.Rest.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -58,16 +61,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollectionInfo.cs" />
-    <Compile Include="IEventCollections.cs" />
-    <Compile Include="KeenObject.cs" />
-    <Compile Include="IEventCollector.cs" />
+    <Compile Include="ServiceDefinitions\IKeenInspection.cs" />
+    <Compile Include="KeenClient.cs" />
+    <Compile Include="ServiceDefinitions\IEventCollector.cs" />
     <Compile Include="KeenGlobalConfig.cs" />
-    <Compile Include="KeenReaderAuthorizationAttribute.cs" />
-    <Compile Include="KeenWriteAuthorizationAttribute.cs" />
+    <Compile Include="ServiceDefinitions\KeenReaderAuthorizationAttribute.cs" />
+    <Compile Include="ServiceDefinitions\KeenWriteAuthorizationAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query\Filter.cs" />
+    <Compile Include="Query\QueryBody.cs" />
+    <Compile Include="Query\OperatorType.cs" />
+    <Compile Include="Query\QueryType.cs" />
+    <Compile Include="Query\TimeFrame.cs" />
+    <Compile Include="Query\Timezone.cs" />
+    <Compile Include="Query\ToStringSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="nugetdeploy.config" />
     <None Include="packages.config" />
+    <None Include="Stardust.KeenIo.Client.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

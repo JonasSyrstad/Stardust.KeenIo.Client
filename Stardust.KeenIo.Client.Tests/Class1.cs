@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Client;
+using Stardust.KeenIo.Client.Query;
+using Stardust.KeenIo.Client.ServiceDefinitions;
 using Xunit;
 
 namespace Stardust.KeenIo.Client.Tests
 {
 
-    public class ClientTest
+    public class ClientTests
     {
         [Fact]
         public async Task AddEntryTest()
@@ -59,7 +59,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void GetCollection()
         {
-            var reader = ProxyFactory.CreateInstance<IEventCollections>("https://api.keen.io");
+            var reader = ProxyFactory.CreateInstance<IKeenInspection>("https://api.keen.io");
             var all = reader.GetAllCollection("560c2d6e672e6c1204fba8d5");
             Assert.NotEmpty(all);
             foreach (var collection in all)
@@ -67,6 +67,17 @@ namespace Stardust.KeenIo.Client.Tests
                 var c = reader.GetCollection("560c2d6e672e6c1204fba8d5", collection.Name);
                 Assert.NotNull(c);
             }
+        }
+
+        [Fact]
+        public void QueryTest()
+        {
+            var reader = ProxyFactory.CreateInstance<IKeenInspection>("https://api.keen.io");
+            var msg = JsonConvert.SerializeObject(new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2" });
+            
+            Assert.NotNull(msg);
+            var result = reader.Query("560c2d6e672e6c1204fba8d5", QueryType.Count, new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2" ,GroupBy = "Name2" });
+            Assert.NotNull(result);
         }
     }
 }

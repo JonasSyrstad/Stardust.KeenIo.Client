@@ -1,3 +1,5 @@
+using Stardust.KeenIo.Client.ServiceDefinitions;
+
 namespace Stardust.KeenIo.Client
 {
     public static class KeenGlobalConfig
