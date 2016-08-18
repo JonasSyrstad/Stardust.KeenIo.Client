@@ -57,6 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionInfo.cs" />
+    <Compile Include="IEventCollections.cs" />
     <Compile Include="KeenObject.cs" />
     <Compile Include="IEventCollector.cs" />
     <Compile Include="KeenGlobalConfig.cs" />
