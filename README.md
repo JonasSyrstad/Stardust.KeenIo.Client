@@ -1,6 +1,8 @@
 # Stardust.KeenIo.Client
 A .net client for keen.io based on Stardust.Interstellar.Rest. Serves as a demo on how to easily build .net clients for any rest api with little effort.
 
+get on nuget: Install-Package Stardust.KeenIo.Client
+
 On application start:
 ```CS
 KeenClient.SetProjectId(ProjectIdFromKeenIo);
