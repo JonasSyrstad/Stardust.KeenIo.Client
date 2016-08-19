@@ -11,6 +11,18 @@ KeenClient.SetGlobalProperty("machineName",Environment.Machine).SetGlobalPropert
 KeenClient.SetReaderKey("readerKeyFromKeenIo");//appSettings key:keen:readerKey
 KeenClient.SetWriterKey("writerKeyFromKeenIo");//appSettings key:keen:writerKey
 ```
+or
+```CS
+KeenClient.Initialize(new KeenConfiguration(ProjectIdFromKeenIo)
+            {
+                GlobalProperties = new Dictionary<string, object>
+                {
+                { "host", Environment.MachineName },
+                { "user", Environment.MachineName }
+                }
+            });
+```
+
 
 To add a new event in keen.io:
 ```CS
