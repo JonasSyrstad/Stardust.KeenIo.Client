@@ -26,7 +26,7 @@ KeenClient.Initialize(new KeenConfiguration(ProjectIdFromKeenIo)
 
 To add a new event in keen.io:
 ```CS
-KeenClient.AddEventAsync(string collectionName,new {Name="Test", Message="This is a test message"});//note that its not awaited. this acts as a fire and forget type non blocking call to keen.io
+KeenClient.AddEventAsync("collectionName",new {Name="Test", Message="This is a test message"});//note that its not awaited. this acts as a fire and forget type non blocking call to keen.io
 ```
 
 To Execute queries against keen.io:
