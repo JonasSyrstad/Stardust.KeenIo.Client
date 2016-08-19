@@ -13,14 +13,19 @@ KeenClient.SetWriterKey("writerKeyFromKeenIo");//appSettings key:keen:writerKey
 ```
 or
 ```CS
-KeenClient.Initialize(new KeenConfiguration(ProjectIdFromKeenIo)
-            {
-                GlobalProperties = new Dictionary<string, object>
-                {
-                { "host", Environment.MachineName },
-                { "user", Environment.MachineName }
-                }
-            });
+KeenClient.Initialize(
+                new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+                    {
+                        GlobalProperties =
+                            new Dictionary<string, object>
+                                {
+                                    { "host", Environment.MachineName },
+                                    { "user", Environment.MachineName },
+                                    { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } }, 
+                                    { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
+                                }
+                    });
+            await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
 ```
 
 
