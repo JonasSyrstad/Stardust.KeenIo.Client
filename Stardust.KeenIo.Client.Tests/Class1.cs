@@ -154,8 +154,7 @@ namespace Stardust.KeenIo.Client.Tests
             KeenClient.Initialize(
                 new KeenConfiguration("560c2d6e672e6c1204fba8d5")
                     {
-                        GlobalProperties =
-                            new Dictionary<string, object>
+                        GlobalProperties = new Dictionary<string, object>
                                 {
                                     { "host", Environment.MachineName },
                                     { "user", Environment.MachineName },
