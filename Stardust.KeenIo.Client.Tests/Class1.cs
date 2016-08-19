@@ -14,6 +14,22 @@ namespace Stardust.KeenIo.Client.Tests
 
     public class ClientTests
     {
+
+        [Fact]
+        public async Task Initialization()
+        {
+            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            {
+                GlobalProperties = new Dictionary<string, object>
+                {
+                { "host", Environment.MachineName },
+                { "user", Environment.MachineName }
+                }
+                
+            });
+            await KeenClient.AddEventAsync("init",new {Message="Initialization"});
+        }
+
         [Fact]
         public async Task AddEntryTest()
         {
@@ -74,9 +90,9 @@ namespace Stardust.KeenIo.Client.Tests
         {
             var reader = ProxyFactory.CreateInstance<IKeenInspection>("https://api.keen.io");
             var msg = JsonConvert.SerializeObject(new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2" });
-            
+
             Assert.NotNull(msg);
-            var result = reader.Query("560c2d6e672e6c1204fba8d5", QueryType.Count, new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2" ,GroupBy = "Name2" });
+            var result = reader.Query("560c2d6e672e6c1204fba8d5", QueryType.Count, new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2", GroupBy = "Name2" });
             Assert.NotNull(result);
         }
     }
