@@ -14,27 +14,39 @@ namespace Stardust.KeenIo.Client
 
         private static string projectId = "";
 
+
+        public static void SetBaseUrl(string url) => baseUrl = url;
+
+        /// <summary>
+        /// Set to false in order to retrhow exceptions. Default value= true.
+        /// </summary>
         public static bool SwalowException { get; set; } = true;
 
-        public static void SetProjectId(string project)
+        public static void Initialize(KeenConfiguration configuration)
         {
-            projectId = project;
+            
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration), "configuration object is null");
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration.ProjectId), "configuration.ProjectId object is null");
+            if (!string.IsNullOrWhiteSpace(configuration.BaseUrl))
+                SetBaseUrl(configuration.BaseUrl);
+            SwalowException = configuration.SwalowException;
+            SetProjectId(configuration.ProjectId);
+            SetReaderKey(configuration.ReaderKey);
+            SetWriterKey(configuration.WriterKey);
+            if (configuration.GlobalProperties == null) return;
+            foreach (var globalProperty in configuration.GlobalProperties)
+            {
+                SetGlobalProperty(globalProperty.Key, globalProperty.Value);
+            }
         }
 
-        public static void SetReaderKey(string key)
-        {
-            KeenGlobalConfig.SetReaderKey(key);
-        }
+        public static void SetProjectId(string project) => projectId = project;
 
-        public static void SetWriterKey(string key)
-        {
-            KeenGlobalConfig.SetWriterKey(key);
-        }
+        public static void SetReaderKey(string key) => KeenGlobalConfig.SetReaderKey(key);
 
-        public static void AddEvent(string collection, dynamic value)
-        {
-            AddEventAsync(collection, value);
-        }
+        public static void SetWriterKey(string key) => KeenGlobalConfig.SetWriterKey(key);
+
+        public static void AddEvent(string collection, dynamic value) => AddEventAsync(collection, value);
 
         public static async Task AddEventAsync(string collection, dynamic value)
         {
@@ -50,10 +62,7 @@ namespace Stardust.KeenIo.Client
         }
 
 
-        public static void AddEvents(IDictionary<string, IEnumerable<object>> items)
-        {
-            AddEventsAsync(items);
-        }
+        public static void AddEvents(IDictionary<string, IEnumerable<object>> items) => AddEventsAsync(items);
 
         public static async Task AddEventsAsync(IDictionary<string, IEnumerable<object>> items)
         {
@@ -68,65 +77,26 @@ namespace Stardust.KeenIo.Client
             }
         }
 
-        public static async Task AddEventsAsync(string collection, IEnumerable<object> items)
-        {
-            await AddEventsAsync(new Dictionary<string, IEnumerable<object>> { { collection, items } });
-        }
+        public static async Task AddEventsAsync(string collection, IEnumerable<object> items) => await AddEventsAsync(new Dictionary<string, IEnumerable<object>> { { collection, items } });
 
-        public static void AddEvents(string collection, IEnumerable<object> items)
-        {
-            AddEventsAsync(new Dictionary<string, IEnumerable<object>> { { collection, items } });
-        }
+        public static void AddEvents(string collection, IEnumerable<object> items) => AddEventsAsync(new Dictionary<string, IEnumerable<object>> { { collection, items } });
 
-        public static async Task<CollectionInfo> GetCollectionAsync(string collection)
-        {
-            return await KeenInspector.GetCollectionAsync(projectId, collection);
-        }
+        public static async Task<CollectionInfo> GetCollectionAsync(string collection) => await KeenInspector.GetCollectionAsync(projectId, collection);
 
-        private static IKeenInspection KeenInspector
-        {
-            get
-            {
-                return ProxyFactory.CreateInstance<IKeenInspection>(baseUrl);
-            }
-        }
+        private static IKeenInspection KeenInspector => ProxyFactory.CreateInstance<IKeenInspection>(baseUrl);
 
-        public static CollectionInfo GetCollection(string collection)
-        {
-            return KeenInspector.GetCollection(projectId, collection);
-        }
+        public static CollectionInfo GetCollection(string collection) => KeenInspector.GetCollection(projectId, collection);
 
-        public static async Task<IEnumerable<CollectionInfo>> GetCollectionsAsync()
-        {
-            return await KeenInspector.GetAllCollectionAsync(projectId);
-        }
+        public static async Task<IEnumerable<CollectionInfo>> GetCollectionsAsync() => await KeenInspector.GetAllCollectionAsync(projectId);
 
-        public static IEnumerable<CollectionInfo> GetCollections()
-        {
-            return KeenInspector.GetAllCollection(projectId);
-        }
+        public static IEnumerable<CollectionInfo> GetCollections() => KeenInspector.GetAllCollection(projectId);
 
-        public static async Task<dynamic> QueryAsync(this QueryType queryType, QueryBody query)
-        {
-            return await KeenInspector.QueryAsync(projectId, queryType, query);
-        }
+        public static async Task<dynamic> QueryAsync(this QueryType queryType, QueryBody query) => await KeenInspector.QueryAsync(projectId, queryType, query);
 
-        public static dynamic Query(this QueryType queryType, QueryBody query)
-        {
-            return KeenInspector.Query(projectId, queryType, query);
-        }
+        public static dynamic Query(this QueryType queryType, QueryBody query) => KeenInspector.Query(projectId, queryType, query);
 
-        public static IEventCollector SetGlobalProperties(string name, object value)
-        {
-            return Collector.SetGlobalProperty(name, value);
-        }
+        public static IEventCollector SetGlobalProperty(string name, object value) => Collector.SetGlobalProperty(name, value);
 
-        private static IEventCollector Collector
-        {
-            get
-            {
-                return ProxyFactory.CreateInstance<IEventCollector>(baseUrl);
-            }
-        }
+        private static IEventCollector Collector => ProxyFactory.CreateInstance<IEventCollector>(baseUrl);
     }
 }
