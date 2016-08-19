@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -25,9 +26,9 @@ namespace Stardust.KeenIo.Client.Tests
                 { "host", Environment.MachineName },
                 { "user", Environment.MachineName }
                 }
-                
+
             });
-            await KeenClient.AddEventAsync("init",new {Message="Initialization"});
+            await KeenClient.AddEventAsync("init", new { Message = "Initialization" });
         }
 
         [Fact]
@@ -92,8 +93,77 @@ namespace Stardust.KeenIo.Client.Tests
             var msg = JsonConvert.SerializeObject(new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2" });
 
             Assert.NotNull(msg);
-            var result = reader.Query("560c2d6e672e6c1204fba8d5", QueryType.Count, new QueryBody { TimeFrame = TimeFrame.ThisWeek, Timezone = Timezone.EuropeStockholm, EventCollection = "collection2", GroupBy = "Name2" });
+            var result = reader.Query(
+                "560c2d6e672e6c1204fba8d5",
+                QueryType.Count,
+                new QueryBody
+                {
+                    TimeFrame = TimeFrame.ThisWeek,
+                    Timezone = Timezone.EuropeStockholm,
+                    EventCollection = "collection2",
+                    //GroupBy = "Name2"
+                });
             Assert.NotNull(result);
+            var cnt = result.result;
+            Assert.NotNull(cnt);
+        }
+
+        [Fact]
+        public async Task QueryExtensionsTests()
+        {
+            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            {
+                GlobalProperties = new Dictionary<string, object>
+                {
+                    { "host", Environment.MachineName },
+                    { "user", Environment.MachineName }
+                }
+
+            });
+            var result = await QueryType.Extraction.QueryAsync(new QueryBody
+            {
+                EventCollection = "collection2",
+                Timezone = Timezone.EuropeStockholm,
+                TimeFrame = TimeFrame.ThisNWeeks(2)
+            });
+            Assert.NotNull(result);
+
+        }
+
+
+        [Fact]
+        public void CountAllEventsTest()
+        {
+            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            {
+                GlobalProperties = new Dictionary<string, object>
+                {
+                    { "host", Environment.MachineName },
+                    { "user", Environment.MachineName }
+                }
+
+            });
+
+            var cnt = KeenClient.GetCollections().GetEventCount(TimeFrame.ThisWeek);
+            Assert.True(cnt > 0);
+        }
+
+        [Fact]
+        public async Task ValueFetcherTest()
+        {
+            KeenClient.Initialize(
+                new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+                    {
+                        GlobalProperties =
+                            new Dictionary<string, object>
+                                {
+                                    { "host", Environment.MachineName },
+                                    { "user", Environment.MachineName },
+                                    { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
+                                    { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
+                                }
+                    });
+            await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
         }
     }
 }

@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="CollectionInfo.cs" />
     <Compile Include="KeenConfiguration.cs" />
+    <Compile Include="ScopedValueFetcher.cs" />
     <Compile Include="ServiceDefinitions\IKeenInspection.cs" />
     <Compile Include="KeenClient.cs" />
     <Compile Include="ServiceDefinitions\IEventCollector.cs" />

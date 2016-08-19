@@ -99,4 +99,41 @@ namespace Stardust.KeenIo.Client
 
         private static IEventCollector Collector => ProxyFactory.CreateInstance<IEventCollector>(baseUrl);
     }
+
+    public static class HelperExtensions
+    {
+        public static long GetEventCount(this IEnumerable<CollectionInfo> collections, TimeFrame timeFrame)
+        {
+            long totalEvents = 0;
+            foreach (var collectionInfo in collections)
+            {
+                var result = GetEventCount(collectionInfo, timeFrame);
+                totalEvents +=result ;
+            }
+            return totalEvents;
+        }
+
+        private static long GetEventCount(this CollectionInfo collectionInfo,TimeFrame timeFrame)
+        {
+            var result = QueryType.Count.Query(new QueryBody { EventCollection = collectionInfo.Name, TimeFrame = timeFrame, Timezone = Timezone.UTC });
+            return (long)result.result;
+        }
+
+        public static async Task<long> GetEventCountAsync(this IEnumerable<CollectionInfo> collections, TimeFrame timeFrame)
+        {
+            long totalEvents = 0;
+            foreach (var collectionInfo in collections)
+            {
+                var result = await GetEventCountAsync(collectionInfo, timeFrame);
+                totalEvents += result;
+            }
+            return totalEvents;
+        }
+
+        private static async Task<long> GetEventCountAsync(this CollectionInfo collectionInfo,TimeFrame timeFrame )
+        {
+            var result = await QueryType.Count.QueryAsync(new QueryBody { EventCollection = collectionInfo.Name, TimeFrame = timeFrame, Timezone = Timezone.UTC });
+            return (long)result.result; ;
+        }
+    }
 }

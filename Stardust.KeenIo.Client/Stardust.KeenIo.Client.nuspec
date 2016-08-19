@@ -18,7 +18,8 @@ KeenClient.AddEvent("collectionName",new {//your values here});</description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>false</developmentDependency>
     <releaseNotes>This is the initial release, currently it does not support Funnels and multi analysis
-Added additional configuration options</releaseNotes>
+Added additional configuration options
+Added helper to populate message from lambdas.</releaseNotes>
     <copyright>Copyright © Stardust 2016</copyright>
     <frameworkAssemblies />
     <dependencies>
