@@ -14,7 +14,7 @@ KeenClient.SetWriterKey("writerKeyFromKeenIo");//appSettings key:keen:writerKey
 or
 ```CS
 KeenClient.Initialize(
-                new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+                new KeenConfiguration(ProjectIdFromKeenIo)
                     {
                         GlobalProperties =
                             new Dictionary<string, object>
@@ -43,4 +43,21 @@ foreach(dynamic resultPart in result)//note that the result is a dynamic, you ne
   //do stuff.
 }
 ```
+
+Execute a funnel analysis:
+```C
+
+ KeenClient.Initialize(new KeenConfiguration(ProjectIdFromKeenIo));
+            var query = new FunnelQuery
+                            {
+                                Steps =
+                                    new List<FunnelStep>
+                                        {
+                                            new FunnelStep { ActorProperty = "Name", EventCollection = "collection1", TimeFrame = TimeFrame.ThisWeek},
+                                            new FunnelStep { ActorProperty = "Name2", EventCollection = "collection2", TimeFrame = TimeFrame.ThisWeek }
+                                        }
+                            };
+            var result = await query.FunnelAsync();
+```
+
 
