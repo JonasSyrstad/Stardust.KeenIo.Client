@@ -39,5 +39,7 @@ namespace Stardust.KeenIo.Client
             var result = await QueryType.Count.QueryAsync(new QueryBody { EventCollection = collectionInfo.Name, TimeFrame = timeFrame, Timezone = Timezone.UTC });
             return (long)result.result; ;
         }
+
+        
     }
 }

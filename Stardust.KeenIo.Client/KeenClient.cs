@@ -10,7 +10,7 @@ namespace Stardust.KeenIo.Client
 {
     public static class KeenClient
     {
-        private static string baseUrl = "https://api.keen.io";
+        internal static string baseUrl = "https://api.keen.io";
 
         internal static string projectId = "";
 

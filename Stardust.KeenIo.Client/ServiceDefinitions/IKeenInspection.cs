@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Newtonsoft.Json;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
 using Stardust.KeenIo.Client.Query;
@@ -49,7 +48,5 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
         [HttpPost]
         [Route("{projectId}/queries/funnel")]
         Task<dynamic> FunnelAsync([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] FunnelQuery query);
-
     }
-
 }

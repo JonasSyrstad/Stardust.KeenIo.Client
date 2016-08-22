@@ -65,17 +65,31 @@
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="KeenAnalyticClient.cs" />
     <Compile Include="KeenConfiguration.cs" />
+    <Compile Include="Management\ApiKeyExtensions.cs" />
+    <Compile Include="Management\ManagementClient.cs" />
+    <Compile Include="Management\ProjectManagementClient.cs" />
+    <Compile Include="Management\ProjectManagementExtensions.cs" />
     <Compile Include="Query\FilterPart.cs" />
     <Compile Include="Query\FunnelQuery.cs" />
     <Compile Include="Query\FunnelStep.cs" />
     <Compile Include="Query\MultiQuery.cs" />
     <Compile Include="Query\QueryPart.cs" />
     <Compile Include="ScopedValueFetcher.cs" />
+    <Compile Include="ServiceDefinitions\ApiKeyDescription.cs" />
+    <Compile Include="ServiceDefinitions\ApiKeyDescriptionRequest.cs" />
+    <Compile Include="ServiceDefinitions\ApiKeyOptions.cs" />
+    <Compile Include="ServiceDefinitions\CachedQueries.cs" />
+    <Compile Include="ServiceDefinitions\EventCollection.cs" />
+    <Compile Include="ServiceDefinitions\IKeenAdministration.cs" />
     <Compile Include="ServiceDefinitions\IKeenInspection.cs" />
     <Compile Include="KeenClient.cs" />
     <Compile Include="ServiceDefinitions\IEventCollector.cs" />
     <Compile Include="KeenGlobalConfig.cs" />
+    <Compile Include="ServiceDefinitions\IKeenProjectManagement.cs" />
+    <Compile Include="ServiceDefinitions\KeenMasterAuthorizationAttribute.cs" />
+    <Compile Include="ServiceDefinitions\KeenOrganizationAuthorizationAttribute.cs" />
     <Compile Include="ServiceDefinitions\KeenReaderAuthorizationAttribute.cs" />
+    <Compile Include="ServiceDefinitions\KeenUser.cs" />
     <Compile Include="ServiceDefinitions\KeenWriteAuthorizationAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query\Filter.cs" />
@@ -85,6 +99,13 @@
     <Compile Include="Query\TimeFrame.cs" />
     <Compile Include="Query\Timezone.cs" />
     <Compile Include="Query\ToStringSerializer.cs" />
+    <Compile Include="ServiceDefinitions\Preferences.cs" />
+    <Compile Include="ServiceDefinitions\ProjectInfo.cs" />
+    <Compile Include="ServiceDefinitions\ProjectManagementInfo.cs" />
+    <Compile Include="ServiceDefinitions\ProjectManagementInfoBase.cs" />
+    <Compile Include="ServiceDefinitions\QueryOptions.cs" />
+    <Compile Include="ServiceDefinitions\SavedQueries.cs" />
+    <Compile Include="ServiceDefinitions\WriteOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="nugetdeploy.config" />
