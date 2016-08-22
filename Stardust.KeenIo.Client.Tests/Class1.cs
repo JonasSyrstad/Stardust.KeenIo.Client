@@ -19,15 +19,15 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task Initialization()
         {
-            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
-            {
-                GlobalProperties = new Dictionary<string, object>
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
                 {
-                { "host", Environment.MachineName },
-                { "user", Environment.MachineName }
-                }
+                    GlobalProperties = new Dictionary<string, object>
+                                           {
+                                               { "host", Environment.MachineName },
+                                               { "user", Environment.MachineName }
+                                           }
 
-            });
+                }.Initialize();
             await KeenClient.AddEventAsync("init", new { Message = "Initialization" });
         }
 
@@ -63,7 +63,7 @@ namespace Stardust.KeenIo.Client.Tests
                                           {
                                               new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest2" },
                                               new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest3" },
-                                              new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest4" }
+                                              new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest44" }
                                           }
                                   }
                               };
@@ -71,6 +71,33 @@ namespace Stardust.KeenIo.Client.Tests
             var m2 = JObject.FromObject(new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest4" });
             await client.AddEvents("560c2d6e672e6c1204fba8d5", envents);
 
+        }
+
+        [Fact]
+        public async Task FunnelTest()
+        {
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+                {
+                    GlobalProperties = new Dictionary<string, object>
+                                           {
+                                               { "host", Environment.MachineName },
+                                               { "user", Environment.MachineName }
+                                           }
+
+                }.Initialize();
+            var query = new FunnelQuery
+                            {
+                                Steps =
+                                    new List<FunnelStep>
+                                        {
+                                            new FunnelStep { ActorProperty = "Name", EventCollection = "collection1", TimeFrame = TimeFrame.ThisWeek},
+                                            new FunnelStep { ActorProperty = "Name2", EventCollection = "collection2", TimeFrame = TimeFrame.ThisWeek }
+                                        }
+                            };
+            //var msg = JsonConvert.SerializeObject(query);
+            //Assert.NotEmpty(msg);
+            var result = await query.FunnelAsync();
+            Assert.NotNull(result);
         }
 
         [Fact]
@@ -151,17 +178,16 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task ValueFetcherTest()
         {
-            KeenClient.Initialize(
-                new KeenConfiguration("560c2d6e672e6c1204fba8d5")
-                    {
-                        GlobalProperties = new Dictionary<string, object>
-                                {
-                                    { "host", Environment.MachineName },
-                                    { "user", Environment.MachineName },
-                                    { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
-                                    { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
-                                }
-                    });
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+                {
+                    GlobalProperties = new Dictionary<string, object>
+                                           {
+                                               { "host", Environment.MachineName },
+                                               { "user", Environment.MachineName },
+                                               { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
+                                               { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
+                                           }
+                }.Initialize();
             await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
         }
     }

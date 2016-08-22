@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
 using Stardust.KeenIo.Client.Query;
@@ -31,5 +33,23 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
         [HttpPost]
         [Route("{projectId}/queries/{query}")]
         dynamic Query([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Path)] QueryType query, [In(InclutionTypes.Body)]QueryBody body);
+
+        [HttpPost]
+        [Route("{projectId}/queries/multi_analysis")]
+        dynamic MultiQuery([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] MultiQuery query);
+
+        [HttpPost]
+        [Route("{projectId}/queries/multi_analysis")]
+        Task<dynamic> MultiQueryAsync([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] MultiQuery query);
+
+        [HttpPost]
+        [Route("{projectId}/queries/funnel")]
+        dynamic Funnel([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] FunnelQuery query);
+
+        [HttpPost]
+        [Route("{projectId}/queries/funnel")]
+        Task<dynamic> FunnelAsync([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] FunnelQuery query);
+
     }
+
 }

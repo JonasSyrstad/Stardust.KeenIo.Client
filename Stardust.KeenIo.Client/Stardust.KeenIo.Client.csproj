@@ -62,7 +62,14 @@
   <ItemGroup>
     <Compile Include="CollectionInfo.cs" />
     <Compile Include="FetcherSerializer.cs" />
+    <Compile Include="HelperExtensions.cs" />
+    <Compile Include="KeenAnalyticClient.cs" />
     <Compile Include="KeenConfiguration.cs" />
+    <Compile Include="Query\FilterPart.cs" />
+    <Compile Include="Query\FunnelQuery.cs" />
+    <Compile Include="Query\FunnelStep.cs" />
+    <Compile Include="Query\MultiQuery.cs" />
+    <Compile Include="Query\QueryPart.cs" />
     <Compile Include="ScopedValueFetcher.cs" />
     <Compile Include="ServiceDefinitions\IKeenInspection.cs" />
     <Compile Include="KeenClient.cs" />

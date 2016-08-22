@@ -12,7 +12,7 @@ namespace Stardust.KeenIo.Client
     {
         private static string baseUrl = "https://api.keen.io";
 
-        private static string projectId = "";
+        internal static string projectId = "";
 
 
         public static void SetBaseUrl(string url) => baseUrl = url;
@@ -20,16 +20,16 @@ namespace Stardust.KeenIo.Client
         /// <summary>
         /// Set to false in order to retrhow exceptions. Default value= true.
         /// </summary>
-        public static bool SwalowException { get; set; } = true;
+        public static bool SwallowException { get; set; } = true;
 
-        public static void Initialize(KeenConfiguration configuration)
+        public static void Initialize(this KeenConfiguration configuration)
         {
             
             if (configuration == null) throw new ArgumentNullException(nameof(configuration), "configuration object is null");
             if (configuration == null) throw new ArgumentNullException(nameof(configuration.ProjectId), "configuration.ProjectId object is null");
             if (!string.IsNullOrWhiteSpace(configuration.BaseUrl))
                 SetBaseUrl(configuration.BaseUrl);
-            SwalowException = configuration.SwalowException;
+            SwallowException = configuration.SwalowException;
             SetProjectId(configuration.ProjectId);
             SetReaderKey(configuration.ReaderKey);
             SetWriterKey(configuration.WriterKey);
@@ -56,7 +56,7 @@ namespace Stardust.KeenIo.Client
             }
             catch (Exception)
             {
-                if (!SwalowException)
+                if (!SwallowException)
                     throw;
             }
         }
@@ -72,7 +72,7 @@ namespace Stardust.KeenIo.Client
             }
             catch (Exception)
             {
-                if (!SwalowException)
+                if (!SwallowException)
                     throw;
             }
         }
@@ -83,7 +83,7 @@ namespace Stardust.KeenIo.Client
 
         public static async Task<CollectionInfo> GetCollectionAsync(string collection) => await KeenInspector.GetCollectionAsync(projectId, collection);
 
-        private static IKeenInspection KeenInspector => ProxyFactory.CreateInstance<IKeenInspection>(baseUrl);
+        internal static IKeenInspection KeenInspector => ProxyFactory.CreateInstance<IKeenInspection>(baseUrl);
 
         public static CollectionInfo GetCollection(string collection) => KeenInspector.GetCollection(projectId, collection);
 
@@ -98,42 +98,5 @@ namespace Stardust.KeenIo.Client
         public static IEventCollector SetGlobalProperty(string name, object value) => Collector.SetGlobalProperty(name, value);
 
         private static IEventCollector Collector => ProxyFactory.CreateInstance<IEventCollector>(baseUrl);
-    }
-
-    public static class HelperExtensions
-    {
-        public static long GetEventCount(this IEnumerable<CollectionInfo> collections, TimeFrame timeFrame)
-        {
-            long totalEvents = 0;
-            foreach (var collectionInfo in collections)
-            {
-                var result = GetEventCount(collectionInfo, timeFrame);
-                totalEvents +=result ;
-            }
-            return totalEvents;
-        }
-
-        private static long GetEventCount(this CollectionInfo collectionInfo,TimeFrame timeFrame)
-        {
-            var result = QueryType.Count.Query(new QueryBody { EventCollection = collectionInfo.Name, TimeFrame = timeFrame, Timezone = Timezone.UTC });
-            return (long)result.result;
-        }
-
-        public static async Task<long> GetEventCountAsync(this IEnumerable<CollectionInfo> collections, TimeFrame timeFrame)
-        {
-            long totalEvents = 0;
-            foreach (var collectionInfo in collections)
-            {
-                var result = await GetEventCountAsync(collectionInfo, timeFrame);
-                totalEvents += result;
-            }
-            return totalEvents;
-        }
-
-        private static async Task<long> GetEventCountAsync(this CollectionInfo collectionInfo,TimeFrame timeFrame )
-        {
-            var result = await QueryType.Count.QueryAsync(new QueryBody { EventCollection = collectionInfo.Name, TimeFrame = timeFrame, Timezone = Timezone.UTC });
-            return (long)result.result; ;
-        }
     }
 }

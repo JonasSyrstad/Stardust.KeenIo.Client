@@ -4,9 +4,7 @@ using Newtonsoft.Json;
 
 namespace Stardust.KeenIo.Client.Query
 {
-    
-
-    public class QueryBody : DynamicObject
+    public class MultiQuery : DynamicObject
     {
         private Dictionary<string, object> dynamicMembers = new Dictionary<string, object>();
         public override bool TryGetMember(GetMemberBinder binder, out object result)
@@ -38,22 +36,19 @@ namespace Stardust.KeenIo.Client.Query
         [JsonProperty("event_collection")]
         public string EventCollection { get; set; }
 
-        [JsonProperty("timeframe", ItemConverterType = typeof(ToStringSerializer), NullValueHandling = NullValueHandling.Ignore)]
-        public TimeFrame TimeFrame { get; set; }
+        [JsonProperty("analyses")]
+        private Dictionary<string, QueryPart> Analyses { get; set; }
 
-        [JsonProperty("group_by", NullValueHandling = NullValueHandling.Ignore)]
-        public string GroupBy { get; set; }
-
-        [JsonProperty("timezone", ItemConverterType = typeof(ToStringSerializer), NullValueHandling = NullValueHandling.Ignore)]
-        public Timezone Timezone { get; set; }
-
-
-        [JsonProperty("target_property", NullValueHandling = NullValueHandling.Ignore)]
-        public string TargetProperty { get; set; }
-
-        [JsonProperty("filters", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("filters")]
         public FilterPart Filters { get; set; }
 
+        [JsonProperty("timeframe")]
+        public TimeFrame TimeFrame { get; set; }
 
+        [JsonProperty("group_by")]
+        public string GroupBy { get; set; }
+
+        [JsonProperty("timezone", ItemConverterType = typeof(ToStringSerializer))]
+        public Timezone Timezone { get; set; }
     }
 }
