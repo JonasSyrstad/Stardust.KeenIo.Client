@@ -6,7 +6,7 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
     public class SavedQueries:CachedQueries
     {
 
-        [JsonProperty("filters")]
+        [JsonProperty("filters", NullValueHandling = NullValueHandling.Ignore)]
         public Filter[] Filters { get; set; }
     }
 }

@@ -4,15 +4,15 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     public class ApiKeyOptions
     {
-        [JsonProperty("queries")]
+        [JsonProperty("queries", NullValueHandling = NullValueHandling.Ignore)]
         public QueryOptions Queries { get; set; }
-        [JsonProperty("cached_queries")]
+        [JsonProperty("cached_queries", NullValueHandling = NullValueHandling.Ignore)]
         public CachedQueries CachedQueries { get; set; }
 
-        [JsonProperty("saved_queries")]
+        [JsonProperty("saved_queries", NullValueHandling = NullValueHandling.Ignore)]
         public SavedQueries SavedQueries { get; set; }
 
-        [JsonProperty("writes")]
+        [JsonProperty("writes", NullValueHandling = NullValueHandling.Ignore)]
         public WriteOptions Writes { get; set; }
     }
 }

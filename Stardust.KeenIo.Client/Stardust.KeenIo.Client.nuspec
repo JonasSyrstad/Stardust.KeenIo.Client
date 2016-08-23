@@ -2,15 +2,15 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata>
     <id>Stardust.KeenIo.Client</id>
-    <version>1.4.0.0</version>
+    <version>1.4.5.0</version>
     <title>Stardust.KeenIo.Client</title>
     <authors>Stardust</authors>
     <description>A full featured .net client for keen.io. 
 It supports (and everything supports task async):
 - adding events (batch and single)
 - analytics: queries, multi queries and funnels
-- project management [not tested fully]
-- api key management  [not tested fully]</description>
+- project management 
+- api key management  </description>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/JonasSyrstad/Stardust.KeenIo.Client</projectUrl>
     <iconUrl>http://stardustframework.wdfiles.com/local--files/blog%3A_start/logo_smal.png</iconUrl>
@@ -19,7 +19,7 @@ It supports (and everything supports task async):
     <releaseNotes>Added Funnel and Multi analysis support
 Added advanced management support (custom api key management and subscription management)  [Not fully tested, the dev account does not have full rights to the api yet]</releaseNotes>
     <copyright>Copyright © Stardust 2016</copyright>
-    <tags>Logging Analytics</tags>
+    <tags>Logging Analytics keen.io keenio keen</tags>
     <frameworkAssemblies />
     <dependencies>
       <group>

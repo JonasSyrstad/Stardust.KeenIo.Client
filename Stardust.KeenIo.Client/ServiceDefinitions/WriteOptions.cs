@@ -5,7 +5,7 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     public class WriteOptions
     {
-        [JsonProperty("autofill")]
+        [JsonProperty("autofill", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string , object> Autofill { get; set; }
     }
 }

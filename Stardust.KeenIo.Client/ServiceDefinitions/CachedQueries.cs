@@ -4,10 +4,10 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     public class CachedQueries
     {
-        [JsonProperty("allowed")]
+        [JsonProperty("allowed", NullValueHandling = NullValueHandling.Ignore)]
         public string[] Allowed { get; set; }
 
-        [JsonProperty("blocked")]
+        [JsonProperty("blocked", NullValueHandling = NullValueHandling.Ignore)]
         public string[] Blocked { get; set; }
     }
 }

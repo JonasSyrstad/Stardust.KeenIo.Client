@@ -5,7 +5,7 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     public class QueryOptions
     {
-        [JsonProperty("filters")]
+        [JsonProperty("filters", NullValueHandling = NullValueHandling.Ignore)]
         public Filter[] Filters { get; set; }
     }
 }

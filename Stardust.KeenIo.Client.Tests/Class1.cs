@@ -21,14 +21,14 @@ namespace Stardust.KeenIo.Client.Tests
         public async Task aInitialization()
         {
             new KeenConfiguration("57bb35408db53dfda8a6cc37")
-                {
-                    GlobalProperties = new Dictionary<string, object>
+            {
+                GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
                                                { "user", Environment.MachineName }
                                            }
 
-                }.Initialize();
+            }.Initialize();
             await KeenClient.AddEventAsync("init", new { Message = "Initialization" });
         }
 
@@ -78,23 +78,23 @@ namespace Stardust.KeenIo.Client.Tests
         public async Task FunnelTest()
         {
             new KeenConfiguration("57bb35408db53dfda8a6cc37")
-                {
-                    GlobalProperties = new Dictionary<string, object>
+            {
+                GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
                                                { "user", Environment.MachineName }
                                            }
 
-                }.Initialize();
+            }.Initialize();
             var query = new FunnelQuery
-                            {
-                                Steps =
+            {
+                Steps =
                                     new List<FunnelStep>
                                         {
                                             new FunnelStep { ActorProperty = "Name", EventCollection = "collection1", TimeFrame = TimeFrame.ThisWeek},
                                             new FunnelStep { ActorProperty = "Name2", EventCollection = "collection2", TimeFrame = TimeFrame.ThisWeek }
                                         }
-                            };
+            };
             //var msg = JsonConvert.SerializeObject(query);
             //Assert.NotEmpty(msg);
             var result = await query.FunnelAsync();
@@ -140,14 +140,14 @@ namespace Stardust.KeenIo.Client.Tests
         public async Task QueryExtensionsTests()
         {
             new KeenConfiguration("57bb35408db53dfda8a6cc37")
-                {
-                    GlobalProperties = new Dictionary<string, object>
+            {
+                GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
                                                { "user", Environment.MachineName }
                                            }
 
-                }.Initialize();
+            }.Initialize();
             var result = await QueryType.Extraction.QueryAsync(new QueryBody
             {
                 EventCollection = "collection2",
@@ -180,15 +180,15 @@ namespace Stardust.KeenIo.Client.Tests
         public async Task ValueFetcherTest()
         {
             new KeenConfiguration("57bb35408db53dfda8a6cc37")
-                {
-                    GlobalProperties = new Dictionary<string, object>
+            {
+                GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
                                                { "user", Environment.MachineName },
                                                { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
                                                { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
                                            }
-                }.Initialize();
+            }.Initialize();
             await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
         }
 
@@ -196,10 +196,47 @@ namespace Stardust.KeenIo.Client.Tests
         public void CreateApiKeyTest()
         {
             new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
-            var client = new ProjectManagementClient("dummy");
-           var key= client.CreateApiKey(new ApiKeyDescriptionRequest {Name = "TEST"+DateTime.UtcNow.Ticks,IsActive = true});
+            var client = new ProjectManagementClient("57bb18a707271955bac4b202");
+            var msg = new ApiKeyDescriptionRequest
+            {
+                Name = "TEST" + DateTime.UtcNow.Ticks,
+                IsActive = true,
+                Options = new ApiKeyOptions { Writes = new WriteOptions { Autofill = new Dictionary<string, object> { { "customerid", 1234 } } } },
+                Permitted = new[] { ApiKeyPermission.Write }
+            };
+            var stringmsg = JsonConvert.SerializeObject(msg);
+            Assert.NotEmpty(stringmsg);
+            var key = client.CreateApiKey(msg);
             client.RevokeApiKey(key.Key);
             Assert.NotNull(key);
+        }
+
+        [Fact]
+        public void CreateProjectTest()
+        {
+            new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
+            var client = new ManagementClient("57bb18a707271955bac4b202");
+            var result = client.CreateProject(
+                 new ProjectManagementInfoBase
+                 {
+                     Name = "UnitTestPrj_" + DateTime.UtcNow.Ticks,
+                     Users = new[] { new KeenUser { Email = "jsyrstad2@gmail.com" } },
+                     Preferences = new Preferences { S3BucketName = "test" }
+                 });
+            Assert.NotNull(result);
+            Assert.NotNull(result.ApiKeys);
+        }
+
+        [Fact]
+        public void GetProjectTest()
+        {
+            new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
+            var client = new ManagementClient("57bb18a707271955bac4b202");
+            var result = client.GetProject("57bb35408db53dfda8a6cc37");
+            var data = JsonConvert.SerializeObject(result);
+            Assert.NotEmpty(data);
+            Assert.NotNull(result);
+            Assert.NotNull(result.ApiKeys);
         }
     }
 }
