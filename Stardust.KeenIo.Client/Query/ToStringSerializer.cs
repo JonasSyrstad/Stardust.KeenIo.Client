@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Stardust.KeenIo.Client.ServiceDefinitions;
 
 namespace Stardust.KeenIo.Client.Query
 {
@@ -34,7 +35,8 @@ namespace Stardust.KeenIo.Client.Query
         /// <returns>The object value.</returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            throw new System.NotImplementedException();
+            var val = serializer.Deserialize(reader, typeof(string));
+            return new ApiKeyPermission {Permission = (string)val};
         }
     }
 }
