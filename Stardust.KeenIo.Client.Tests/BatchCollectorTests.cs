@@ -28,11 +28,11 @@ namespace Stardust.KeenIo.Client.Tests
                 KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_{i}" });
             }
 
-            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_1000" });
+            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = "TestRun_1000" });
 
-            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_1002" });
+            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = "TestRun_1002" });
 
-            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_1004" });
+            KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = "TestRun_1004" });
         }
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>

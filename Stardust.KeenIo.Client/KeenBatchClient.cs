@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Client;
@@ -11,7 +13,7 @@ namespace Stardust.KeenIo.Client
 {
     public static class KeenBatchClient
     {
-        private static object lockObject = new object();
+        private static readonly object lockObject = new object();
 
         private static ConcurrentBag<BatchEventItem> batchCollector = new ConcurrentBag<BatchEventItem>();
 
@@ -27,6 +29,12 @@ namespace Stardust.KeenIo.Client
 
         private static volatile bool copyingEventCache;
 
+        private static volatile bool paused;
+
+        private static long eventsCollected;
+
+        private static Stopwatch collectionTime;
+
         public static async void AddEvent(string collection, object eventEntry)
         {
             if (!eventPumpActive)
@@ -35,6 +43,8 @@ namespace Stardust.KeenIo.Client
                     throw new InvalidAsynchronousStateException("Event pump is not running");
                 return;
             }
+            if(paused) return;
+            eventsCollected++;
             if (copyingEventCache) await Task.Delay(2);
             batchCollector.Add(new BatchEventItem { Collection = collection, EventEntry = eventEntry });
             if (batchCollector.Count > batchSize)
@@ -72,8 +82,11 @@ namespace Stardust.KeenIo.Client
         {
             try
             {
-                var grouped = lst.GroupBy(g => g.Collection);
-                await ProxyFactory.CreateInstance<IEventCollector>(KeenClient.baseUrl).AddEvents(KeenClient.projectId, grouped.ToDictionary(k => k.Key, v => v.Select(s => s.EventEntry)));
+                if (!paused)
+                {
+                    var grouped = lst.GroupBy(g => g.Collection);
+                    await ProxyFactory.CreateInstance<IEventCollector>(KeenClient.baseUrl).AddEvents(KeenClient.projectId, grouped.ToDictionary(k => k.Key, v => v.Select(s => s.EventEntry))); 
+                }
                 lock (lockObject)
                 {
                     batchCollectorProcessing = null;
@@ -89,13 +102,24 @@ namespace Stardust.KeenIo.Client
             }
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void Flush()
         {
             FlushInternal();
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static bool HasPendingEvents => pushingEvents || !batchCollector.IsEmpty;
 
+        public static long EventsCollected
+        {
+            get
+            {
+                return eventsCollected;
+            }
+        }
+
+        // ReSharper disable once MemberCanBePrivate.Global
         public static async Task ShutdownEventPumpAsync()
         {
             eventPumpActive = false;
@@ -120,8 +144,11 @@ namespace Stardust.KeenIo.Client
         {
             eventPumpActive = true;
             ThrowExceptions(throwExceptionsAfterShutdown);
+            if (collectionTime == null) collectionTime = Stopwatch.StartNew();
+            else collectionTime.Start();
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public static void ThrowExceptions(bool state)
         {
             throwExceptions = state;
@@ -131,5 +158,25 @@ namespace Stardust.KeenIo.Client
         {
             batchSize = size;
         }
+
+        /// <summary>
+        /// Pauses event collections. Events will be written until Resume is called.
+        /// </summary>
+        // ReSharper disable once UnusedMember.Global
+        public static void Pause()
+        {
+            collectionTime.Stop();
+            paused = true;
+        }
+
+        // ReSharper disable once UnusedMember.Global
+        public static void Resume()
+        {
+            paused = false;
+            collectionTime.Start();
+        }
+
+        // ReSharper disable once UnusedMember.Global
+        public static TimeSpan? CollectionFor => collectionTime?.Elapsed;
     }
 }
