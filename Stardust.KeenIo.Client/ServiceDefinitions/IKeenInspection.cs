@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
+using Stardust.Interstellar.Rest.Service;
 using Stardust.KeenIo.Client.Query;
 
 namespace Stardust.KeenIo.Client.ServiceDefinitions
@@ -11,6 +11,7 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
     [KeenReaderAuthorization]
     [FixedClientUserAgent("stardust/1.0")]
     [IRoutePrefix("3.0/projects")]
+    [ErrorHandler(typeof(ErrorHandling.KeenErrorHandler))]
     public interface IKeenInspection
     {
         [Route("{projectId}/events/{collectionName}")]

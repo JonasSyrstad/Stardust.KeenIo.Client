@@ -10,6 +10,7 @@ using Stardust.KeenIo.Client.Management;
 using Stardust.KeenIo.Client.Query;
 using Stardust.KeenIo.Client.ServiceDefinitions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Stardust.KeenIo.Client.Tests
 {
@@ -20,7 +21,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task aInitialization()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37")
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -38,15 +39,24 @@ namespace Stardust.KeenIo.Client.Tests
             var client = ProxyFactory.CreateInstance<IEventCollector>("https://api.keen.io");
             client.SetGlobalProperty("host", Environment.MachineName).SetGlobalProperty("user", Environment.UserName);
 
-            await client.AddEvent("57bb35408db53dfda8a6cc37", "test", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
+            await client.AddEvent("560c2d6e672e6c1204fba8d5", "test", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
 
+        }
+
+        private readonly ITestOutputHelper output;
+
+        public ClientTests(ITestOutputHelper output)
+        {
+            this.output = output;
         }
 
         [Fact]
         public async Task AddEntriesBatchTest()
         {
+            new KeenConfiguration {SwalowException = false}.Initialize();
             var client = ProxyFactory.CreateInstance<IEventCollector>("https://api.keen.io");
             client.SetGlobalProperty("host", Environment.MachineName).SetGlobalProperty("user", Environment.UserName);
+            
             var envents = new Dictionary<string, IEnumerable<object>>
                               {
                                   {
@@ -70,14 +80,14 @@ namespace Stardust.KeenIo.Client.Tests
                               };
             var m = JObject.FromObject(envents);
             var m2 = JObject.FromObject(new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest4" });
-            await client.AddEvents("57bb35408db53dfda8a6cc37", envents);
+            await client.AddEvents("560c2d6e672e6c1204fba8d5", envents);
 
         }
 
         [Fact]
         public async Task FunnelTest()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37")
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -105,11 +115,11 @@ namespace Stardust.KeenIo.Client.Tests
         public void GetCollection()
         {
             var reader = ProxyFactory.CreateInstance<IKeenInspection>("https://api.keen.io");
-            var all = reader.GetAllCollection("57bb35408db53dfda8a6cc37");
+            var all = reader.GetAllCollection("560c2d6e672e6c1204fba8d5");
             Assert.NotEmpty(all);
             foreach (var collection in all)
             {
-                var c = reader.GetCollection("57bb35408db53dfda8a6cc37", collection.Name);
+                var c = reader.GetCollection("560c2d6e672e6c1204fba8d5", collection.Name);
                 Assert.NotNull(c);
             }
         }
@@ -122,7 +132,7 @@ namespace Stardust.KeenIo.Client.Tests
 
             Assert.NotNull(msg);
             var result = reader.Query(
-                "57bb35408db53dfda8a6cc37",
+                "560c2d6e672e6c1204fba8d5",
                 QueryType.Count,
                 new QueryBody
                 {
@@ -139,7 +149,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task QueryExtensionsTests()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37")
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -162,7 +172,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void CountAllEventsTest()
         {
-            KeenClient.Initialize(new KeenConfiguration("57bb35408db53dfda8a6cc37")
+            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
             {
                 GlobalProperties = new Dictionary<string, object>
                 {
@@ -179,12 +189,12 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task ValueFetcherTest()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37")
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
-                                               { "user", Environment.MachineName },
+                                               { "user", Environment.UserName },
                                                { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
                                                { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
                                            }
@@ -195,26 +205,34 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void CreateApiKeyTest()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
-            var client = new ProjectManagementClient("57bb18a707271955bac4b202");
-            var msg = new ApiKeyDescriptionRequest
+            try
             {
-                Name = "TEST" + DateTime.UtcNow.Ticks,
-                IsActive = true,
-                Options = new ApiKeyOptions { Writes = new WriteOptions { Autofill = new Dictionary<string, object> { { "customerid", 1234 } } } },
-                Permitted = new[] { ApiKeyPermission.Write }
-            };
-            var stringmsg = JsonConvert.SerializeObject(msg);
-            Assert.NotEmpty(stringmsg);
-            var key = client.CreateApiKey(msg);
-            client.RevokeApiKey(key.Key);
-            Assert.NotNull(key);
+                new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
+                var client = new ProjectManagementClient("57bb18a707271955bac4b202");
+                var msg = new ApiKeyDescriptionRequest
+                {
+                    Name = "TEST" + DateTime.UtcNow.Ticks,
+                    IsActive = true,
+                    Options = new ApiKeyOptions { Writes = new WriteOptions { Autofill = new Dictionary<string, object> { { "customerid", 1234 } } } },
+                    Permitted = new[] { ApiKeyPermission.Write }
+                };
+                var stringmsg = JsonConvert.SerializeObject(msg);
+                Assert.NotEmpty(stringmsg);
+                var key = client.CreateApiKey(msg);
+                client.RevokeApiKey(key.Key);
+                Assert.NotNull(key);
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine(ex.Message);
+                throw;
+            }
         }
 
         [Fact]
         public void CreateProjectTest()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
             var client = new ManagementClient("57bb18a707271955bac4b202");
             var result = client.CreateProject(
                  new ProjectManagementInfoBase
@@ -230,9 +248,9 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void GetProjectTest()
         {
-            new KeenConfiguration("57bb35408db53dfda8a6cc37").Initialize();
+            new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
             var client = new ManagementClient("57bb18a707271955bac4b202");
-            var result = client.GetProject("57bb35408db53dfda8a6cc37");
+            var result = client.GetProject("560c2d6e672e6c1204fba8d5");
             var data = JsonConvert.SerializeObject(result);
             Assert.NotEmpty(data);
             Assert.NotNull(result);

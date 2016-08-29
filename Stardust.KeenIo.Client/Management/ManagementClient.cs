@@ -16,7 +16,7 @@ namespace Stardust.KeenIo.Client.Management
             this.organizationId = organizationId;
         }
 
-        public IKeenAdministration GetClient()
+        internal IKeenAdministration GetClient()
         {
             return ProxyFactory.CreateInstance<IKeenAdministration>(KeenClient.baseUrl);
         }

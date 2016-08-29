@@ -4,12 +4,14 @@ using System.Web.Http;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
+using Stardust.Interstellar.Rest.Service;
 
 namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     [KeenWriteAuthorization]
     [FixedClientUserAgent("stardust/1.0")]
     [IRoutePrefix("3.0/projects")]
+    [ErrorHandler(typeof(ErrorHandling.KeenErrorHandler))]
     public interface IEventCollector : IServiceWithGlobalParameters
     {
         [HttpPost]

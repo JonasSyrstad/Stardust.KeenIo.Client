@@ -2,12 +2,14 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Stardust.Interstellar.Rest.Annotations;
 using Stardust.Interstellar.Rest.Annotations.UserAgent;
+using Stardust.Interstellar.Rest.Service;
 
 namespace Stardust.KeenIo.Client.ServiceDefinitions
 {
     [KeenOrganizationAuthorization]
     [FixedClientUserAgent("stardust/1.0")]
     [IRoutePrefix("3.0")]
+    [ErrorHandler(typeof(ErrorHandling.KeenErrorHandler))]
     public interface IKeenAdministration
     {
         [HttpGet]
