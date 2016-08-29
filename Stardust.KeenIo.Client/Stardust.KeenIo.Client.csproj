@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analytics\Class1.cs" />
+    <Compile Include="await.cs" />
+    <Compile Include="BatchEventItem.cs" />
     <Compile Include="CollectionInfo.cs" />
     <Compile Include="ErrorHandling\ErrorMessage.cs" />
     <Compile Include="ErrorHandling\KeenErrorHandler.cs" />
@@ -74,6 +76,7 @@
     <Compile Include="FetcherSerializer.cs" />
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="KeenAnalyticClient.cs" />
+    <Compile Include="KeenBatchClient.cs" />
     <Compile Include="KeenConfiguration.cs" />
     <Compile Include="Management\ApiKeyExtensions.cs" />
     <Compile Include="Management\ManagementClient.cs" />

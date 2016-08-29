@@ -14,7 +14,6 @@ using Xunit.Abstractions;
 
 namespace Stardust.KeenIo.Client.Tests
 {
-
     public class ClientTests
     {
 

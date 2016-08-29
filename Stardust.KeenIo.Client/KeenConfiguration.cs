@@ -102,5 +102,10 @@ namespace Stardust.KeenIo.Client
         /// This is the propper place to put environment info and other static information.
         /// </summary>
         public Dictionary<string, object> GlobalProperties { get; set; }
+
+        /// <summary>
+        /// set the bacth clients batch threshold. (min value 10)
+        /// </summary>
+        public int? BatchSize { get; set; }
     }
 }

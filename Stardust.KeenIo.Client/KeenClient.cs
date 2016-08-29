@@ -24,7 +24,7 @@ namespace Stardust.KeenIo.Client
 
         public static void Initialize(this KeenConfiguration configuration)
         {
-            
+
             if (configuration == null) throw new ArgumentNullException(nameof(configuration), "configuration object is null");
             if (configuration == null) throw new ArgumentNullException(nameof(configuration.ProjectId), "configuration.ProjectId object is null");
             if (!string.IsNullOrWhiteSpace(configuration.BaseUrl))
@@ -38,6 +38,8 @@ namespace Stardust.KeenIo.Client
             {
                 SetGlobalProperty(globalProperty.Key, globalProperty.Value);
             }
+            if (configuration.BatchSize.HasValue && configuration.BatchSize.Value > 10) 
+                KeenBatchClient.SetBatchSize(configuration.BatchSize.Value);
         }
 
         public static void SetProjectId(string project) => projectId = project;
