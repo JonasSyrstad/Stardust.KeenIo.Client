@@ -3,6 +3,8 @@ A .net client for keen.io based on Stardust.Interstellar.Rest. Serves as a demo 
 
 get on nuget: Install-Package Stardust.KeenIo.Client
 
+**Initialization**
+
 On application start:
 ```CS
 KeenClient.SetProjectId(ProjectIdFromKeenIo);
@@ -27,12 +29,31 @@ KeenClient.Initialize(
                     });
             await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
 ```
-
+**Adding events to keen.io**
 
 To add a new event in keen.io:
 ```CS
 KeenClient.AddEventAsync("collectionName",new {Name="Test", Message="This is a test message"});//note that its not awaited. this acts as a fire and forget type non blocking call to keen.io
 ```
+*NEW in 1.5*
+Batch processor: Add events to keen.io in batches. Reduce the number of http calls to keen.io servers
+
+initialization
+```CS
+KeenClient.Initialize(new KeenConfiguration { ProjectId = ProjectIdFromKeenIo, BatchSize = 10 });
+KeenBatchClient.StartEventPump();
+```
+
+add an event
+```CS
+KeenBatchClient.AddEvent(collectionName, SomeEventToPost);
+```
+To ensure that all events has been written to keen.io you have to call the following at application shutdown.
+```CS
+KeenBatchClient.ShutdownEventPump(); //if your shutdown is async there is also an async version of this method.
+```
+
+**Analysis**
 
 To Execute queries against keen.io:
 
