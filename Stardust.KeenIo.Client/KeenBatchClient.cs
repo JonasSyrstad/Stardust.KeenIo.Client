@@ -14,6 +14,7 @@ namespace Stardust.KeenIo.Client
 {
     public static class KeenBatchClient
     {
+        public static bool VerboseLogging{ get; set; }
         private static readonly object lockObject = new object();
         private static readonly object counterLock = new object();
 
@@ -73,13 +74,13 @@ namespace Stardust.KeenIo.Client
         private static void FlushInternal()
         {
             if (PushingEvents) return;
-            ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(FlushInternal)}");
+            if(VerboseLogging)ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(FlushInternal)}");
             lock (lockObject)
             {
                 if (PushingEvents)
                 {
-                    
-                    ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal no push");
+
+                    if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal no push");
                     return;
                 }
                 copyingEventCache = true;
@@ -87,7 +88,7 @@ namespace Stardust.KeenIo.Client
                 batchCollector = new ConcurrentBag<BatchEventItem>();
                 copyingEventCache = false;
             }
-            ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal");
+            if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal");
             PushBatch();
         }
 
@@ -118,11 +119,11 @@ namespace Stardust.KeenIo.Client
                     await batchEventCollector.AddEvents(KeenClient.projectId, grouped.ToDictionary(k => k.Key, v => v.Select(s => s.EventEntry))).ConfigureAwait(false);
                     //lock (counterLock)
                     {
-                        ExtensionsFactory.GetService<ILogger>()?.Message("lastPush PushInternal");
+                        if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("lastPush PushInternal");
                         lastPush = DateTime.UtcNow;
                     }
                 }
-                ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
                 lock (lockObject)
                 {
                     batchCollectorProcessing = null;
@@ -131,13 +132,13 @@ namespace Stardust.KeenIo.Client
             }
             catch (Exception ex)
             {
-                ExtensionsFactory.GetService<ILogger>()?.Error(ex);
-                ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
+                 ExtensionsFactory.GetService<ILogger>()?.Error(ex);
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
                 lock (lockObject)
                 {
                     batchCollectorProcessing = null;
                 }
-                ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal exeption handler");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal exeption handler");
             }
         }
 
@@ -155,26 +156,26 @@ namespace Stardust.KeenIo.Client
         {
             try
             {
-                ExtensionsFactory.GetService<ILogger>()?.Message("Shutting down the event pump.");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Shutting down the event pump.");
                 collectionTime.Stop();
                 eventPumpActive = false;
                 while (HasPendingEvents)
                 {
                     if (!PushingEvents)
                     {
-                        ExtensionsFactory.GetService<ILogger>()?.Message("flushing event stores.");
+                        if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("flushing event stores.");
                         Flush();
                         await Task.Delay(100);
                     }
                     await Task.Delay(10);
 
                 }
-                ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(ShutdownEventPumpAsync)}");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(ShutdownEventPumpAsync)}");
                 lock (lockObject)
                 {
-                    ExtensionsFactory.GetService<ILogger>()?.Message($"Having lock {nameof(ShutdownEventPumpAsync)}");
+                    if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"Having lock {nameof(ShutdownEventPumpAsync)}");
                 }
-                ExtensionsFactory.GetService<ILogger>()?.Message($"lock released {nameof(ShutdownEventPumpAsync)}");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"lock released {nameof(ShutdownEventPumpAsync)}");
             }
             
             catch (Exception ex)

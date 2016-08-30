@@ -1,61 +1,25 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Net;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Common;
-using Stardust.Interstellar.Rest.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Stardust.KeenIo.Client.Tests
 {
-    public class Logger : ILogger, IServiceLocator
-    {
-        private readonly ITestOutputHelper output;
-
-        public Logger(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
-
-        public void Error(Exception error)
-        {
-            output.WriteLine(error.Message);
-            output.WriteLine(error.StackTrace);
-            if (error.InnerException != null) Error(error.InnerException);
-        }
-
-        public void Message(string message)
-        {
-            output.WriteLine(message);
-        }
-
-        public void Message(string format, params object[] args)
-        {
-            output.WriteLine(format, args);
-        }
-
-        public T GetService<T>()
-        {
-            if (this is T)
-                return (T)(this as object);
-            return default(T);
-        }
-
-        public IEnumerable<T> GetServices<T>()
-        {
-            return new List<T>();
-        }
-    }
-
     public class BatchCollectorTests : IDisposable
     {
         private readonly ITestOutputHelper output;
 
         private static readonly string ProjectId = ConfigurationManager.AppSettings["keen:projectId"];
+
+        private Stopwatch timer;
+
         public BatchCollectorTests(ITestOutputHelper output)
         {
+            timer = Stopwatch.StartNew();
+            KeenBatchClient.VerboseLogging = false;  
             this.output = output;
             var logger = new Logger(output);
             ExtensionsFactory.SetServiceLocator(logger);
@@ -73,11 +37,13 @@ namespace Stardust.KeenIo.Client.Tests
 
 
         [Fact]
-        public void AddEvents()
+        public async Task AddEvents()
         {
-            for (var i = 0; i < 100; i++)
+            var rnd=new Random(2);
+            for (var i = 0; i < 1000; i++)
             {
                 KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_{i}" });
+                await Task.Delay(rnd.Next(0, 10));
             }
 
             KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = "TestRun_1000" });
@@ -99,6 +65,7 @@ namespace Stardust.KeenIo.Client.Tests
             {
                 output.WriteLine(ex.Message);
             }
+            output.WriteLine($"ellapsed time {timer.ElapsedMilliseconds}ms");
         }
     }
 }

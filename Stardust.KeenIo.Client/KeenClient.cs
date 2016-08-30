@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Net;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
@@ -13,8 +14,17 @@ namespace Stardust.KeenIo.Client
     {
         static KeenClient()
         {
-            ServicePointManager.DefaultConnectionLimit = 1600;
+            if (!AdjustConnectionLimit) return;
+            var connectionLimit = Environment.ProcessorCount * 48;
+            if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["stardust:defaultConnectionLimit"]))
+            {
+                int value;
+                if (int.TryParse(ConfigurationManager.AppSettings["stardust:defaultConnectionLimit"], out value)) connectionLimit = value;
+            }
+            ServicePointManager.DefaultConnectionLimit = connectionLimit;
         }
+
+        private static bool AdjustConnectionLimit => ServicePointManager.DefaultConnectionLimit > (Environment.ProcessorCount * 8) && string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["stardust:defaultConnectionLimit"]);
 
         internal static string baseUrl = "https://api.keen.io";
 
@@ -44,7 +54,7 @@ namespace Stardust.KeenIo.Client
             {
                 SetGlobalProperty(globalProperty.Key, globalProperty.Value);
             }
-            if (configuration.BatchSize.HasValue && configuration.BatchSize.Value > 10) 
+            if (configuration.BatchSize.HasValue && configuration.BatchSize.Value > 10)
                 KeenBatchClient.SetBatchSize(configuration.BatchSize.Value);
         }
 
