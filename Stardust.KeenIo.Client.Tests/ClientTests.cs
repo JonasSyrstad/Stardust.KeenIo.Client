@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -16,11 +17,12 @@ namespace Stardust.KeenIo.Client.Tests
 {
     public class ClientTests
     {
+        private static readonly string ProjectId = ConfigurationManager.AppSettings["keen:projectId"];
 
         [Fact]
         public async Task aInitialization()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            new KeenConfiguration(ProjectId)
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -38,7 +40,7 @@ namespace Stardust.KeenIo.Client.Tests
             var client = ProxyFactory.CreateInstance<IEventCollector>("https://api.keen.io");
             client.SetGlobalProperty("host", Environment.MachineName).SetGlobalProperty("user", Environment.UserName);
 
-            await client.AddEvent("560c2d6e672e6c1204fba8d5", "test", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
+            await client.AddEvent(ProjectId, "test", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
 
         }
 
@@ -52,10 +54,10 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task AddEntriesBatchTest()
         {
-            new KeenConfiguration {SwalowException = false}.Initialize();
+            new KeenConfiguration { SwalowException = false }.Initialize();
             var client = ProxyFactory.CreateInstance<IEventCollector>("https://api.keen.io");
             client.SetGlobalProperty("host", Environment.MachineName).SetGlobalProperty("user", Environment.UserName);
-            
+
             var envents = new Dictionary<string, IEnumerable<object>>
                               {
                                   {
@@ -79,14 +81,14 @@ namespace Stardust.KeenIo.Client.Tests
                               };
             var m = JObject.FromObject(envents);
             var m2 = JObject.FromObject(new { TimeStamp2 = DateTime.UtcNow, Name2 = "UnitTest4" });
-            await client.AddEvents("560c2d6e672e6c1204fba8d5", envents);
+            await client.AddEvents(ProjectId, envents);
 
         }
 
         [Fact]
         public async Task FunnelTest()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            new KeenConfiguration(ProjectId)
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -114,11 +116,11 @@ namespace Stardust.KeenIo.Client.Tests
         public void GetCollection()
         {
             var reader = ProxyFactory.CreateInstance<IKeenInspection>("https://api.keen.io");
-            var all = reader.GetAllCollection("560c2d6e672e6c1204fba8d5");
+            var all = reader.GetAllCollection(ProjectId);
             Assert.NotEmpty(all);
             foreach (var collection in all)
             {
-                var c = reader.GetCollection("560c2d6e672e6c1204fba8d5", collection.Name);
+                var c = reader.GetCollection(ProjectId, collection.Name);
                 Assert.NotNull(c);
             }
         }
@@ -131,7 +133,7 @@ namespace Stardust.KeenIo.Client.Tests
 
             Assert.NotNull(msg);
             var result = reader.Query(
-                "560c2d6e672e6c1204fba8d5",
+                ProjectId,
                 QueryType.Count,
                 new QueryBody
                 {
@@ -148,7 +150,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task QueryExtensionsTests()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            new KeenConfiguration(ProjectId)
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
@@ -171,7 +173,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void CountAllEventsTest()
         {
-            KeenClient.Initialize(new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            KeenClient.Initialize(new KeenConfiguration(ProjectId)
             {
                 GlobalProperties = new Dictionary<string, object>
                 {
@@ -188,17 +190,18 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task ValueFetcherTest()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5")
+            new KeenConfiguration(ProjectId)
             {
                 GlobalProperties = new Dictionary<string, object>
                                            {
                                                { "host", Environment.MachineName },
                                                { "user", Environment.UserName },
                                                { "fetchedValue", new ScopedValueFetcher { FetchAction = () => Environment.OSVersion } },
-                                               { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } }
+                                               { "time", new ScopedValueFetcher { FetchAction = () => DateTime.UtcNow.Ticks } },
+                                               { "keen", new ScopedValueFetcher { FetchAction = () => new {timestamp=DateTime.UtcNow.AddMinutes(-3)} } }
                                            }
             }.Initialize();
-            await KeenClient.AddEventAsync("fetcherTest", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
+            await KeenClient.AddEventAsync("fetcherTest2", new { TimeStamp = DateTime.UtcNow, Name = "UnitTest" });
         }
 
         [Fact]
@@ -206,7 +209,7 @@ namespace Stardust.KeenIo.Client.Tests
         {
             try
             {
-                new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
+                new KeenConfiguration(ProjectId).Initialize();
                 var client = new ProjectManagementClient("57bb18a707271955bac4b202");
                 var msg = new ApiKeyDescriptionRequest
                 {
@@ -231,7 +234,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void CreateProjectTest()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
+            new KeenConfiguration(ProjectId).Initialize();
             var client = new ManagementClient("57bb18a707271955bac4b202");
             var result = client.CreateProject(
                  new ProjectManagementInfoBase
@@ -247,9 +250,9 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public void GetProjectTest()
         {
-            new KeenConfiguration("560c2d6e672e6c1204fba8d5").Initialize();
+            new KeenConfiguration(ProjectId).Initialize();
             var client = new ManagementClient("57bb18a707271955bac4b202");
-            var result = client.GetProject("560c2d6e672e6c1204fba8d5");
+            var result = client.GetProject(ProjectId);
             var data = JsonConvert.SerializeObject(result);
             Assert.NotEmpty(data);
             Assert.NotNull(result);

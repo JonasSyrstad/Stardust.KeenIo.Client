@@ -24,6 +24,22 @@ namespace Stardust.KeenIo.Client.ServiceDefinitions
 
         [HttpPost]
         [Route("{projectId}/events")]
-        Task AddEvents([In(InclutionTypes.Path)]string projectId, [ExtensionLevel(3)][In(InclutionTypes.Body)]IDictionary<string, IEnumerable<object>> eventEntry);
+        Task AddEvents([In(InclutionTypes.Path)] string projectId, [ExtensionLevel(3)] [In(InclutionTypes.Body)] IDictionary<string, IEnumerable<object>> eventEntry);
+    }
+
+    [KeenWriteAuthorization]
+    [FixedClientUserAgent("stardust/1.0")]
+    [IRoutePrefix("3.0/projects")]
+    [ErrorHandler(typeof(ErrorHandling.KeenErrorHandler))]
+    public interface IBatchEventCollector
+    {
+        [HttpPost]
+        [Route("{projectId}/events")]
+        Task AddEvents([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Body)] IDictionary<string, IEnumerable<object>> eventEntry);
+
+        [HttpPost]
+        [Route("{projectId}/events/{collectionName}")]
+        Task AddEvent([In(InclutionTypes.Path)] string projectId, [In(InclutionTypes.Path)] string collectionName, [In(InclutionTypes.Body)] object eventEntry);
+
     }
 }

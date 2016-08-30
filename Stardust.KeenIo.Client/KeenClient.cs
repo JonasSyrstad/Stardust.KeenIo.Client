@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Stardust.Interstellar.Rest.Annotations.Messaging;
 using Stardust.Interstellar.Rest.Client;
@@ -10,6 +11,11 @@ namespace Stardust.KeenIo.Client
 {
     public static class KeenClient
     {
+        static KeenClient()
+        {
+            ServicePointManager.DefaultConnectionLimit = 1600;
+        }
+
         internal static string baseUrl = "https://api.keen.io";
 
         internal static string projectId = "";
@@ -20,7 +26,7 @@ namespace Stardust.KeenIo.Client
         /// <summary>
         /// Set to false in order to retrhow exceptions. Default value= true.
         /// </summary>
-        public static bool SwallowException { get; set; } = true;
+        public static bool SwallowException { get; private set; } = true;
 
         public static void Initialize(this KeenConfiguration configuration)
         {
