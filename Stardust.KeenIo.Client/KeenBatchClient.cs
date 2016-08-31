@@ -14,7 +14,7 @@ namespace Stardust.KeenIo.Client
 {
     public static class KeenBatchClient
     {
-        public static bool VerboseLogging{ get; set; }
+        public static bool VerboseLogging { get; set; }
         private static readonly object lockObject = new object();
         private static readonly object counterLock = new object();
 
@@ -74,7 +74,7 @@ namespace Stardust.KeenIo.Client
         private static void FlushInternal()
         {
             if (PushingEvents) return;
-            if(VerboseLogging)ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(FlushInternal)}");
+            if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(FlushInternal)}");
             lock (lockObject)
             {
                 if (PushingEvents)
@@ -128,11 +128,11 @@ namespace Stardust.KeenIo.Client
                 {
                     batchCollectorProcessing = null;
                 }
-                ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal");
+                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal");
             }
             catch (Exception ex)
             {
-                 ExtensionsFactory.GetService<ILogger>()?.Error(ex);
+                ExtensionsFactory.GetService<ILogger>()?.Error(ex);
                 if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
                 lock (lockObject)
                 {
@@ -177,7 +177,7 @@ namespace Stardust.KeenIo.Client
                 }
                 if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"lock released {nameof(ShutdownEventPumpAsync)}");
             }
-            
+
             catch (Exception ex)
             {
                 ExtensionsFactory.GetService<ILogger>()?.Error(ex);
