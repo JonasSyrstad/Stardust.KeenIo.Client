@@ -40,7 +40,16 @@ Batch processor: Add events to keen.io in batches. Reduce the number of http cal
 
 initialization
 ```CS
-KeenClient.Initialize(new KeenConfiguration { ProjectId = ProjectIdFromKeenIo, BatchSize = 10 });
+KeenClient.Initialize(new KeenConfiguration
+            {
+                ProjectId = ProjectId,
+                BatchSize = 10,
+                SwalowException = false,
+                GlobalProperties = new Dictionary<string, object>
+                                           {
+                        {"keen", new ScopedValueFetcher(() => new { timestamp=DateTime.UtcNow, created=DateTime.UtcNow}) }//create the event in keen with timestamp = time of creation
+                                           }
+            });
 KeenBatchClient.StartEventPump();
 ```
 
