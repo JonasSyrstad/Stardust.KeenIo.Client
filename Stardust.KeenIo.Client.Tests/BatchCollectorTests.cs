@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -19,17 +20,26 @@ namespace Stardust.KeenIo.Client.Tests
         public BatchCollectorTests(ITestOutputHelper output)
         {
             timer = Stopwatch.StartNew();
-            KeenBatchClient.VerboseLogging = false;  
+            KeenBatchClient.VerboseLogging = false;
             this.output = output;
             var logger = new Logger(output);
             ExtensionsFactory.SetServiceLocator(logger);
             //System.Net.GlobalProxySelection.Select = WebProxy.GetDefaultProxy();
-            new KeenConfiguration { ProjectId = ProjectId, BatchSize = 10, SwalowException = false }.Initialize();
+            new KeenConfiguration
+            {
+                ProjectId = ProjectId,
+                BatchSize = 10,
+                SwalowException = false,
+                GlobalProperties = new Dictionary<string, object>
+                                           {
+                        {"keen", new ScopedValueFetcher(() => new { timestamp=DateTime.UtcNow, created=DateTime.UtcNow}) }
+                                           }
+            }.Initialize();
             KeenBatchClient.StartEventPump();
         }
 
         [Fact]
-        public async Task  AddEvent()
+        public async Task AddEvent()
         {
             KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = "TestRun" });
             await KeenBatchClient.ShutdownEventPumpAsync();
@@ -39,7 +49,7 @@ namespace Stardust.KeenIo.Client.Tests
         [Fact]
         public async Task AddEvents()
         {
-            var rnd=new Random(2);
+            var rnd = new Random(2);
             for (var i = 0; i < 1000; i++)
             {
                 KeenBatchClient.AddEvent("batchTests", new { TimeStamp = DateTime.UtcNow, Name = $"TestRun_{i}" });

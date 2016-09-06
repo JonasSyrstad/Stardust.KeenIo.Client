@@ -1,3 +1,31 @@
+#region license header
+//
+// keenbatchclient.cs
+// This file is part of Stardust.KeenIo.Client
+//
+// Author: Jonas Syrstad (jonas.syrstad@dnvgl.com), http://no.linkedin.com/in/jonassyrstad/) 
+// Copyright (c) 2016 Jonas Syrstad. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+#endregion license header
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,6 +69,8 @@ namespace Stardust.KeenIo.Client
 
         private static IBatchEventCollector batchEventCollector;
 
+        private static ILogger logger;
+
         static KeenBatchClient()
         {
             batchEventCollector = ProxyFactory.CreateInstance<IBatchEventCollector>(KeenClient.baseUrl);
@@ -48,6 +78,9 @@ namespace Stardust.KeenIo.Client
 
         public static async void AddEvent(string collection, object eventEntry)
         {
+            Stopwatch timer = null;
+            if (VerboseLogging)
+                timer = Stopwatch.StartNew();
             if (!eventPumpActive)
             {
                 if (throwExceptions)
@@ -61,26 +94,35 @@ namespace Stardust.KeenIo.Client
             var eventItemCloned = GlobalParameterExtensions.AppendGlobalParameters(typeof(IEventCollector).FullName, eventEntry, 0);
             batchCollector.Add(new BatchEventItem { Collection = collection, EventEntry = eventItemCloned });
             bool shouldFlush;
-            //lock (counterLock)
+            lock (counterLock)
             {
                 shouldFlush = batchCollector.Count > batchSize || lastPush < DateTime.UtcNow.AddMinutes(-5);
             }
+            if (VerboseLogging && timer != null)
+            {
+                timer.Stop();
+                Logger?.Message($"Adding event: {timer.ElapsedMilliseconds}");
+            }
             if (shouldFlush)
             {
+                timer?.Restart();
                 FlushInternal();
+                if (VerboseLogging && timer != null)
+                {
+                    timer.Stop();
+                    Logger?.Message($"Flushing event cache: {timer.ElapsedMilliseconds}");
+                }
             }
         }
 
         private static void FlushInternal()
         {
             if (PushingEvents) return;
-            if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(FlushInternal)}");
             lock (lockObject)
             {
                 if (PushingEvents)
                 {
 
-                    if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal no push");
                     return;
                 }
                 copyingEventCache = true;
@@ -88,7 +130,6 @@ namespace Stardust.KeenIo.Client
                 batchCollector = new ConcurrentBag<BatchEventItem>();
                 copyingEventCache = false;
             }
-            if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released FlushInternal");
             PushBatch();
         }
 
@@ -97,6 +138,10 @@ namespace Stardust.KeenIo.Client
             Task.Run(
                 async () =>
                     {
+
+                        Stopwatch timer = null;
+                        if (VerboseLogging)
+                            timer = Stopwatch.StartNew();
                         var lst = new List<BatchEventItem>();
                         while (!batchCollectorProcessing.IsEmpty)
                         {
@@ -106,6 +151,11 @@ namespace Stardust.KeenIo.Client
                         }
                         await PushInternal(lst);
                         batchCollectorProcessing = null;
+                        if (VerboseLogging && timer != null)
+                        {
+                            timer.Stop();
+                            Logger?.Message($"Pushing {lst.Count} events to keen in {timer.ElapsedMilliseconds}ms");
+                        }
                     });
         }
 
@@ -117,28 +167,23 @@ namespace Stardust.KeenIo.Client
                 {
                     var grouped = lst.GroupBy(g => g.Collection);
                     await batchEventCollector.AddEvents(KeenClient.projectId, grouped.ToDictionary(k => k.Key, v => v.Select(s => s.EventEntry))).ConfigureAwait(false);
-                    //lock (counterLock)
+                    lock (counterLock)
                     {
-                        if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("lastPush PushInternal");
                         lastPush = DateTime.UtcNow;
                     }
                 }
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
                 lock (lockObject)
                 {
                     batchCollectorProcessing = null;
                 }
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal");
             }
             catch (Exception ex)
             {
-                ExtensionsFactory.GetService<ILogger>()?.Error(ex);
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(PushInternal)}");
+                Logger?.Error(ex);
                 lock (lockObject)
                 {
                     batchCollectorProcessing = null;
                 }
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Lock released PushInternal exeption handler");
             }
         }
 
@@ -156,31 +201,25 @@ namespace Stardust.KeenIo.Client
         {
             try
             {
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("Shutting down the event pump.");
+                if (VerboseLogging) Logger?.Message("Shutting down the event pump.");
                 collectionTime.Stop();
                 eventPumpActive = false;
                 while (HasPendingEvents)
                 {
                     if (!PushingEvents)
                     {
-                        if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message("flushing event stores.");
+                        if (VerboseLogging) Logger?.Message("flushing event stores.");
                         Flush();
                         await Task.Delay(100);
                     }
                     await Task.Delay(10);
 
                 }
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"taking lock {nameof(ShutdownEventPumpAsync)}");
-                lock (lockObject)
-                {
-                    if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"Having lock {nameof(ShutdownEventPumpAsync)}");
-                }
-                if (VerboseLogging) ExtensionsFactory.GetService<ILogger>()?.Message($"lock released {nameof(ShutdownEventPumpAsync)}");
             }
 
             catch (Exception ex)
             {
-                ExtensionsFactory.GetService<ILogger>()?.Error(ex);
+                Logger?.Error(ex);
                 if (!KeenClient.SwallowException)
                     throw;
             }
@@ -191,8 +230,8 @@ namespace Stardust.KeenIo.Client
         public static void StartEventPump(bool throwExceptionsAfterShutdown = false)
         {
             ProxyFactory.CreateProxy(typeof(IBatchEventCollector));
-            ExtensionsFactory.GetService<ILogger>()?.Message("Starting event pump.");
             eventPumpActive = true;
+            if (VerboseLogging) Logger?.Message("Starting event pump.");
             ThrowExceptions(throwExceptionsAfterShutdown);
             if (collectionTime == null) collectionTime = Stopwatch.StartNew();
             else collectionTime.Start();
@@ -212,7 +251,7 @@ namespace Stardust.KeenIo.Client
         // ReSharper disable once UnusedMember.Global
         public static void Pause()
         {
-            ExtensionsFactory.GetService<ILogger>()?.Message("Pausing event pump, no more events are collected until resume is called");
+            if (VerboseLogging) Logger?.Message("Pausing event pump, no more events are collected until resume is called");
             lock (lockObject)
             {
                 collectionTime.Stop();
@@ -223,7 +262,7 @@ namespace Stardust.KeenIo.Client
         // ReSharper disable once UnusedMember.Global
         public static void Resume()
         {
-            ExtensionsFactory.GetService<ILogger>()?.Message("Resuming event pump");
+            if (VerboseLogging) Logger?.Message("Resuming event pump");
             lock (lockObject)
             {
                 paused = false;
@@ -236,5 +275,15 @@ namespace Stardust.KeenIo.Client
 
         // ReSharper disable once MemberCanBePrivate.Global
         public static bool Paused => paused;
+
+        private static ILogger Logger
+        {
+            get
+            {
+                if (!VerboseLogging) return null;
+                if(Logger==null) logger = ExtensionsFactory.GetService<ILogger>();
+                return Logger;
+            }
+        }
     }
 }

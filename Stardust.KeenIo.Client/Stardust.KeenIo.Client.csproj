@@ -123,6 +123,7 @@
   <ItemGroup>
     <None Include="nugetdeploy.config" />
     <None Include="packages.config" />
+    <None Include="Stardust.KeenIo.Client.licenseheader" />
     <None Include="Stardust.KeenIo.Client.nuspec">
       <SubType>Designer</SubType>
     </None>
